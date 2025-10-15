@@ -125,7 +125,10 @@ data(penguins)
 Group the penguins by species and nest the remaining data into a column called data. Save the result in a new dataframe called `penguins_nested`:
 
 ```{r, echo= FALSE, eval= FALSE}
-# Your code here: Use group_by() and nest()
+penguins_nested <- penguins |>
+  group_by(species) |> 
+  nest()
+View(penguins_nested)
 ```
 :::
 :::alert-info
@@ -137,7 +140,11 @@ Write a function called `summarize_bills` that takes a dataframe and returns:
 
 ```{r, echo= FALSE, eval= FALSE}
 summarize_bills <- function(df) {
-  # Your code here: use summarise() to create the three variables
+  df |>
+    summarize(count = n(),
+              mean_bill_length = mean(bill_length_mm, na.rm = T),
+              max_bill_length = max(bill_length_mm, na.rm = T)
+    )
 }
 
 # Test your function on the first species
@@ -150,10 +157,9 @@ Add a new column called `bill_stats` to `penguins_nested` that applies your `sum
 
 ```{r, echo= FALSE, eval= FALSE}
 penguins_nested <- penguins_nested %>%
-  # Your code here: mutate() with map()
-
+  mutate(bill_stats = map(data, summarize_bills))
 # Look at the result
-penguins_nested
+View(penguins_nested)
 ```
 
 :::
@@ -163,7 +169,8 @@ Create a clean summary table by selecting just `species` and `bill_stats`, then 
 
 ```{r, echo= FALSE, eval= FALSE}
 penguins_summary <- penguins_nested %>%
-  # Your code here: select() and unnest()
+  select(species, bill_stats) |>
+  unnest()
 
 penguins_summary
 ```
@@ -175,7 +182,11 @@ Write the complete pipeline from the original `penguins` data to the final summa
 
 ```{r, echo= FALSE, eval= FALSE}
 final_summary <- penguins %>%
-  # Your complete pipeline here
+  group_by(species) |> 
+  nest() |>
+  mutate(bill_stats = map(data, summarize_bills)) |>
+  select(species, bill_stats) |>
+  unnest()
 
 final_summary
 ```
